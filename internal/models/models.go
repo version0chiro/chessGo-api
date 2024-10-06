@@ -16,3 +16,9 @@ func NewApp(ddb *dynamodb.Client) *App {
 		DB: ddb,
 	}
 }
+
+type Player struct {
+	ID       string
+	Conn     interface{}
+	Username string
+}
