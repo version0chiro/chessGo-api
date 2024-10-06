@@ -8,6 +8,7 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/version0chiro/chessGo-api/internal/db"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type User struct {
@@ -19,29 +20,29 @@ func LoginHandler(w http.ResponseWriter, r *http.Request, ddb *dynamodb.Client) 
 	w.Header().Set("Content-Type", "application/json")
 	var u User
 	json.NewDecoder(r.Body).Decode(&u)
-	username, password, err := db.GetUser(ddb, u.Username)
+	_, password, err := db.GetUser(ddb, u.Username)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Println("Error: ", err)
 		fmt.Fprintf(w, "Failed to get user")
 		return
 	}
-	if u.Username == username && u.Password == password {
-		tokenString, err := createToken(u.Username)
-		fmt.Println("Token: ", tokenString)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			fmt.Println("Error: ", err)
-
-			fmt.Fprintf(w, "Failed to create token")
-		}
-		w.WriteHeader(http.StatusOK)
-		fmt.Fprintf(w, "Token: %s", tokenString)
-		return
-	} else {
+	err = bcrypt.CompareHashAndPassword([]byte(password), []byte(u.Password))
+	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
 		fmt.Fprintf(w, "Invalid username or password")
+		return
 	}
+	tokenString, err := createToken(u.Username)
+	fmt.Println("Token: ", tokenString)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Println("Error: ", err)
+		fmt.Fprintf(w, "Failed to create token")
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprintf(w, "Token: %s", tokenString)
 }
 
 func ProtectedHandler(w http.ResponseWriter, r *http.Request) {
@@ -68,6 +69,13 @@ func SignupHandler(w http.ResponseWriter, r *http.Request, ddb *dynamodb.Client)
 	w.Header().Set("Content-Type", "application/json")
 	var u User
 	json.NewDecoder(r.Body).Decode(&u)
+	hashedPassword, err := HashPassword(u.Password)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Println("Error: ", err)
+		fmt.Fprintf(w, "Failed to hash password")
+		return
+	}
 	if u.Username == "" || u.Password == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "Username and password are required")
@@ -81,5 +89,5 @@ func SignupHandler(w http.ResponseWriter, r *http.Request, ddb *dynamodb.Client)
 	}
 	w.WriteHeader(http.StatusOK)
 	fmt.Fprintf(w, "Token: %s", tokenString)
-	db.AddUser(ddb, u.Username, u.Password)
+	db.AddUser(ddb, u.Username, hashedPassword)
 }
