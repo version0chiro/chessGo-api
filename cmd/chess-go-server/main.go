@@ -12,6 +12,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/version0chiro/chessGo-api/pkg/auth"
 	"github.com/version0chiro/chessGo-api/pkg/queue"
+	"github.com/version0chiro/chessGo-api/pkg/sockets" // Add the ws package for WebSocket handling
 )
 
 type App struct {
@@ -27,10 +28,17 @@ func main() {
 	ddb := dynamodb.NewFromConfig(cfg)
 	app := App{DB: ddb}
 	r := mux.NewRouter()
+	qm := queue.NewQueueManager()
 	r.Handle("/login", http.HandlerFunc(app.LoginHandler)).Methods("POST")
 	r.Handle("/protected", http.HandlerFunc(auth.ProtectedHandler)).Methods("GET")
 	r.Handle("/signup", http.HandlerFunc(app.SignupHandler)).Methods("POST")
 	r.Handle("/queue", http.HandlerFunc(app.QueueHandler)).Methods("POST")
+
+	// WebSocket route with closure to pass the QueueManager
+	r.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
+		sockets.WebSocketHandler(qm, w, r)
+	})
+
 	log.Println("Server is running on port 8080")
 	log.Fatal(http.ListenAndServe(":8080", r))
 }

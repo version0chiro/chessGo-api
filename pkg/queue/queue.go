@@ -35,17 +35,23 @@ func (qm *QueueManager) AddPlayer(p models.Player) {
 }
 
 func (qm *QueueManager) MatchPlayers() {
+	qm.mutex.Lock()
+	defer qm.mutex.Unlock()
+
 	if len(qm.queue) < 2 {
 		return
 	}
+
 	p1 := qm.queue[0]
 	p2 := qm.queue[1]
 
 	qm.queue = qm.queue[2:]
 
+	// Start a new game with WebSocket communication
 	log.Println("Player 1: ", p1.Username)
 	log.Println("Player 2: ", p2.Username)
 
-	game.StartGame(p1, p2)
+	// Call game logic to manage the game
+	go game.StartGame(p1, p2)
 
 }

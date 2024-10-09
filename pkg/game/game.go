@@ -24,4 +24,28 @@ func StartGame(p1, p2 models.Player) {
 
 func (gs *GameSession) Start() {
 	log.Println("Game session started between: ", gs.Player1.Username, "and", gs.Player2.Username)
+	// Start goroutines to handle messages from both players
+	go handlePlayerMessages(gs.Player1, gs.Player2)
+	go handlePlayerMessages(gs.Player2, gs.Player1)
+}
+
+func handlePlayerMessages(player models.Player, opponent models.Player) {
+	for {
+		_, message, err := player.Conn.ReadMessage()
+		if err != nil {
+			log.Println("Error reading message:", err)
+			player.Conn.Close()
+			return
+		}
+
+		log.Printf("received message for %s: %s\n", player.ID, message)
+
+		err = opponent.Conn.WriteMessage(1, message)
+
+		if err != nil {
+			log.Println("Error sending message:", err)
+			opponent.Conn.Close()
+			return
+		}
+	}
 }

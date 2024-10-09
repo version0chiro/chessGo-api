@@ -3,6 +3,7 @@ package models
 
 import (
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
+	"github.com/gorilla/websocket"
 )
 
 // App struct holds the DynamoDB client and other shared dependencies.
@@ -19,6 +20,6 @@ func NewApp(ddb *dynamodb.Client) *App {
 
 type Player struct {
 	ID       string
-	Conn     interface{}
 	Username string
+	Conn     *websocket.Conn
 }
