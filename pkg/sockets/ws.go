@@ -34,17 +34,14 @@ func WebSocketHandler(qm *queue.QueueManager, w http.ResponseWriter, r *http.Req
 func handlePlayerConnection(conn *websocket.Conn, playerID string) {
 	defer conn.Close()
 	for {
-		// Read message from WebSocket
 		_, message, err := conn.ReadMessage()
 		if err != nil {
 			log.Println("Error reading message:", err)
 			break
 		}
 
-		// Handle incoming moves or events
 		log.Printf("Received message from player %s: %s", playerID, message)
 
-		// Example: Broadcast move to opponent
 		broadcastToOpponent(playerID, message)
 	}
 }

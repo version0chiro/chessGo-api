@@ -24,7 +24,6 @@ func StartGame(p1, p2 models.Player) {
 
 func (gs *GameSession) Start() {
 	log.Println("Game session started between: ", gs.Player1.Username, "and", gs.Player2.Username)
-	// Start goroutines to handle messages from both players
 	go handlePlayerMessages(gs.Player1, gs.Player2)
 	go handlePlayerMessages(gs.Player2, gs.Player1)
 }

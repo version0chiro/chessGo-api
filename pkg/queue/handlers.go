@@ -13,7 +13,6 @@ import (
 var queueManager = NewQueueManager()
 
 func QueueHandler(w http.ResponseWriter, r *http.Request, db *dynamodb.Client) {
-	// get the username from the post request
 	w.Header().Set("Content-Type", "application/json")
 	var u models.Player
 	json.NewDecoder(r.Body).Decode(&u)
@@ -24,7 +23,6 @@ func QueueHandler(w http.ResponseWriter, r *http.Request, db *dynamodb.Client) {
 		return
 	}
 
-	// place the player in the queue
 	player := models.Player{
 		Username: username,
 	}

@@ -12,7 +12,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/version0chiro/chessGo-api/pkg/auth"
 	"github.com/version0chiro/chessGo-api/pkg/queue"
-	"github.com/version0chiro/chessGo-api/pkg/sockets" // Add the ws package for WebSocket handling
+	"github.com/version0chiro/chessGo-api/pkg/sockets"
 )
 
 type App struct {

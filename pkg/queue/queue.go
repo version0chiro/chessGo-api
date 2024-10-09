@@ -47,11 +47,9 @@ func (qm *QueueManager) MatchPlayers() {
 
 	qm.queue = qm.queue[2:]
 
-	// Start a new game with WebSocket communication
 	log.Println("Player 1: ", p1.Username)
 	log.Println("Player 2: ", p2.Username)
 
-	// Call game logic to manage the game
 	go game.StartGame(p1, p2)
 
 }
