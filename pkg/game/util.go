@@ -39,9 +39,33 @@ func IsValidMove(startRow, startCol, endRow, endCol int, board [][]string) bool 
 			fmt.Println("Valid pawn move")
 			return true
 		}
+		if startCol == endCol && endRow == startRow-2 && startRow == 6 && board[endRow][endCol] == emptySquare {
+			fmt.Println("Valid pawn move")
+			return true
+		}
+		if endRow == startRow-1 && endCol == startCol-1 && board[endRow][endCol] != emptySquare {
+			fmt.Println("Valid pawn move")
+			return true
+		}
+		if endRow == startRow-1 && endCol == startCol+1 && board[endRow][endCol] != emptySquare {
+			fmt.Println("Valid pawn move")
+			return true
+		}
 		// Add more pawn rules (captures, initial two-square move, etc.)
 	case "p": // Black pawn
 		if startCol == endCol && endRow == startRow+1 && board[endRow][endCol] == emptySquare {
+			fmt.Println("Valid pawn move")
+			return true
+		}
+		if startCol == endCol && endRow == startRow+2 && startRow == 1 && board[endRow][endCol] == emptySquare {
+			fmt.Println("Valid pawn move")
+			return true
+		}
+		if endRow == startRow+1 && endCol == startCol-1 && board[endRow][endCol] != emptySquare {
+			fmt.Println("Valid pawn move")
+			return true
+		}
+		if endRow == startRow+1 && endCol == startCol+1 && board[endRow][endCol] != emptySquare {
 			fmt.Println("Valid pawn move")
 			return true
 		}
