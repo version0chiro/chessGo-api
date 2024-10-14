@@ -22,4 +22,5 @@ type Player struct {
 	ID       string
 	Username string
 	Conn     *websocket.Conn
+	Turn     bool
 }
