@@ -2,38 +2,11 @@ package game
 
 import (
 	"fmt"
-	"strings"
 )
 
 const (
 	emptySquare = ""
 )
-
-// Converts a FEN string to a 2D board representation
-func fenToBoard(fen string) [][]string {
-	board := make([][]string, 8)
-	rows := strings.Split(fen, " ")[0] // Only take the board part of the FEN
-
-	for i, row := range strings.Split(rows, "/") {
-		board[i] = make([]string, 8)
-		col := 0
-
-		for _, char := range row {
-			if char >= '1' && char <= '8' {
-				emptyCount := int(char - '0')
-				for j := 0; j < emptyCount; j++ {
-					board[i][col] = emptySquare
-					col++
-				}
-			} else {
-				board[i][col] = string(char)
-				col++
-			}
-		}
-	}
-
-	return board
-}
 
 // IsValidMove checks if a move from (start_row, start_col) to (end_row, end_col) is valid
 func IsValidMove(startRow, startCol, endRow, endCol int, board [][]string) bool {

@@ -107,7 +107,6 @@ func handlePlayerMessages(player models.Player, opponent models.Player) {
 		toRow := int(to["row"].(float64))
 		toCol := int(to["col"].(float64))
 		fmt.Println("Move: ", fromRow, fromCol, toRow, toCol)
-
 		isValid := IsValidMove(fromRow, fromCol, toRow, toCol, board)
 		fmt.Println("Is valid move: ", isValid)
 
