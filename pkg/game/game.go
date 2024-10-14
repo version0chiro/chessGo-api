@@ -100,7 +100,6 @@ func handlePlayerMessages(player models.Player, opponent models.Player) {
 			log.Println("Error unmarshalling board data:", err)
 			return
 		}
-		fmt.Println("Board data: ", board)
 		from := move["from"].(map[string]interface{})
 		to := move["to"].(map[string]interface{})
 		fromRow := int(from["row"].(float64))
@@ -108,37 +107,69 @@ func handlePlayerMessages(player models.Player, opponent models.Player) {
 		toRow := int(to["row"].(float64))
 		toCol := int(to["col"].(float64))
 		fmt.Println("Move: ", fromRow, fromCol, toRow, toCol)
-		board[toRow][toCol] = board[fromRow][fromCol]
-		board[fromRow][fromCol] = ""
-		fmt.Println("Board after move: ", board)
-		move["board"] = board
-		move["type"] = "move"
-		moveMessage := Message{
-			Type:    "move",
-			Content: "Move made by " + player.Username,
-			Board:   board,
-			Turn:    opponent.ID,
-		}
 
-		moveJson, err := json.Marshal(moveMessage)
-		if err != nil {
-			log.Println("Error marshalling move message:", err)
-			return
-		}
+		isValid := IsValidMove(fromRow, fromCol, toRow, toCol, board)
+		fmt.Println("Is valid move: ", isValid)
 
-		err = opponent.Conn.WriteMessage(1, moveJson)
+		if !isValid {
+			log.Println("Invalid move by ", player.Username)
+			invalidMoveMessage := Message{
+				Type:    "invalidMove",
+				Content: "Invalid move by " + player.Username,
+				Board:   board,
+				Turn:    opponent.ID,
+			}
+			invalidMoveJson, err := json.Marshal(invalidMoveMessage)
+			if err != nil {
+				log.Println("Error marshalling invalid move message:", err)
+				return
+			}
+			err = opponent.Conn.WriteMessage(1, invalidMoveJson)
+			if err != nil {
+				log.Println("Error sending message:", err)
+				opponent.Conn.Close()
+				return
+			}
+			err = player.Conn.WriteMessage(1, invalidMoveJson)
+			if err != nil {
+				log.Println("Error sending message:", err)
+				player.Conn.Close()
+				return
+			}
 
-		if err != nil {
-			log.Println("Error sending message:", err)
-			opponent.Conn.Close()
-			return
-		}
+		} else {
+			board[toRow][toCol] = board[fromRow][fromCol]
+			board[fromRow][fromCol] = ""
+			fmt.Println("Board after move: ", board)
+			move["board"] = board
+			move["type"] = "move"
+			moveMessage := Message{
+				Type:    "move",
+				Content: "Move made by " + player.Username,
+				Board:   board,
+				Turn:    opponent.ID,
+			}
 
-		err = player.Conn.WriteMessage(1, moveJson)
-		if err != nil {
-			log.Println("Error sending message:", err)
-			player.Conn.Close()
-			return
+			moveJson, err := json.Marshal(moveMessage)
+			if err != nil {
+				log.Println("Error marshalling move message:", err)
+				return
+			}
+
+			err = opponent.Conn.WriteMessage(1, moveJson)
+
+			if err != nil {
+				log.Println("Error sending message:", err)
+				opponent.Conn.Close()
+				return
+			}
+
+			err = player.Conn.WriteMessage(1, moveJson)
+			if err != nil {
+				log.Println("Error sending message:", err)
+				player.Conn.Close()
+				return
+			}
 		}
 	}
 }
